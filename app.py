@@ -13,7 +13,8 @@ SAP AWS CLI provides the ability to control AWS based SAP system
 
 import click
 
-from aws import ec2
+from aws.ec2 import Ec2Manager
+
 
 @click.group()
 def cli():
@@ -21,18 +22,24 @@ def cli():
     pass
 
 
-@cli.command('list_instances')
+@cli.command('list-instances')
+# @click.argument('sap_sid')
 @click.option('--all-instances', is_flag=True, help='Displays all instances and not just SAP')
 def list_instances(all_instances):
     """List EC2 instances."""
-    instances_list = ec2.get_instances(all_instances)
+    sap_sid = ''
+    # TODO Refactor later to make more generic
+    ec2_manager = Ec2Manager('default')
+
+    instances_list = ec2_manager.get_instances(all_instances, sap_sid)
     for instance in instances_list:
         print(instance)
+
 
 @cli.command('start_instance')
 def start_instance():
     pass
 
+
 if __name__ == '__main__':
     cli()
-
