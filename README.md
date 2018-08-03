@@ -6,7 +6,7 @@ Command Line Interface to control SAP system running on AWS
 
 - The **awscli** should be install and the basic configuration shuold be doe with API key and secret id. Current we are just pulling the default profile but will allow for specifying the required profile in the future. 
 - Python 3.7 needs to be install along with pipenv. When the code is pulled down pipenv needs to be run. 
-- Currently to run the use the following: `pipenv run sapawscli`
+- Currently to run the use the following: `pipenv run app.py`
 - The tags currently supported are:
   - SAP_SID: Set this to the system SID 
   - SAP_SYSNR: Set this to the system number
