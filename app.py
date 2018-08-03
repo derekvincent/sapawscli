@@ -12,33 +12,64 @@ SAP AWS CLI provides the ability to control AWS based SAP system
 """
 
 import click
+import boto3
 
 from aws.ec2 import Ec2Manager
 
+"""Initializes global variables."""
+session = None
+ec2_manager = None
+
 
 @click.group()
-def cli():
+@click.option('--profile', default=None, help="Use a specific AWS profile")
+def cli(profile):
     """SAPAWSCLI: Control AWS based SAP systems"""
-    pass
+    global session, ec2_manager
+
+    session_cfg = {}
+    if profile:
+        session_cfg['profile_name'] = profile
+
+    session = boto3.Session(**session_cfg)
+    ec2_manager = Ec2Manager(session)
 
 
 @cli.command('list-instances')
-# @click.argument('sap_sid')
 @click.option('--all-instances', is_flag=True, help='Displays all instances and not just SAP')
-def list_instances(all_instances):
+@click.option('--sap-sid', default=None, help='Returns the systems associated with the SAP System ID')
+@click.option('--sap-env', default=None, help='Returns the systems in the specified environment')
+def list_instances(all_instances, sap_sid, sap_env):
     """List EC2 instances."""
-    sap_sid = ''
     # TODO Refactor later to make more generic
-    ec2_manager = Ec2Manager('default')
+    #ec2_manager = Ec2Manager('default')
 
-    instances_list = ec2_manager.get_instances(all_instances, sap_sid)
+    instances_list = ec2_manager.get_instances(all_instances, sap_sid, sap_env)
     for instance in instances_list:
         print(instance)
 
 
-@cli.command('start_instance')
-def start_instance():
-    pass
+@cli.command('instance-status')
+@click.argument('instance_id')
+def instance_status(instance_id):
+    """Returns the status of the specified instance."""
+    #ec2_manager = Ec2Manager('default')
+    print(ec2_manager.get_instances_status(instance_id))
+
+
+@cli.command('start-instance')
+@click.argument('instance_id')
+def start_instance(instance_id):
+    """Start the AWS Instance."""
+    #ec2_manager = Ec2Manager('default')
+    print(ec2_manager.start_instance(instance_id,True))
+
+@cli.command('stop-instance')
+@click.argument('instance_id')
+def stop_instance(instance_id):
+    """Stop the AWS Instance"""
+    #ec2_manager = Ec2Manager('default')
+    print(ec2_manager.stop_instance(instance_id, True))
 
 
 if __name__ == '__main__':
