@@ -13,19 +13,23 @@ SAP AWS CLI provides the ability to control AWS based SAP system
 
 import click
 import boto3
+import json
 
 from aws.ec2 import Ec2Manager
+from botocore.exceptions import ClientError
+
+from sap.system import SAPSystemManager
 
 """Initializes global variables."""
 session = None
 ec2_manager = None
-
+sap_manager = None
 
 @click.group()
 @click.option('--profile', default=None, help="Use a specific AWS profile")
 def cli(profile):
     """SAPAWSCLI: Control AWS based SAP systems"""
-    global session, ec2_manager
+    global session, ec2_manager, sap_manager
 
     session_cfg = {}
     if profile:
@@ -33,6 +37,7 @@ def cli(profile):
 
     session = boto3.Session(**session_cfg)
     ec2_manager = Ec2Manager(session)
+    sap_manager = SAPSystemManager(ec2_manager)
 
 
 @cli.command('list-instances')
@@ -41,19 +46,25 @@ def cli(profile):
 @click.option('--sap-env', default=None, help='Returns the systems in the specified environment')
 def list_instances(all_instances, sap_sid, sap_env):
     """List EC2 instances."""
-    # TODO Refactor later to make more generic
-    #ec2_manager = Ec2Manager('default')
 
-    instances_list = ec2_manager.get_instances(all_instances, sap_sid, sap_env)
-    for instance in instances_list:
-        print(instance)
+    try:
+        instances_list = ec2_manager.get_instances(all_instances, sap_sid, sap_env)
+        click.echo(json.dumps(
+            instances_list,
+            sort_keys=True,
+            indent=4,
+            separators=(',', ': ')
+            )
+        )
+
+    except ClientError as error:
+        click.echo(error, err=True)
 
 
 @cli.command('instance-status')
 @click.argument('instance_id')
 def instance_status(instance_id):
     """Returns the status of the specified instance."""
-    #ec2_manager = Ec2Manager('default')
     print(ec2_manager.get_instances_status(instance_id))
 
 
@@ -61,15 +72,20 @@ def instance_status(instance_id):
 @click.argument('instance_id')
 def start_instance(instance_id):
     """Start the AWS Instance."""
-    #ec2_manager = Ec2Manager('default')
     print(ec2_manager.start_instance(instance_id,True))
 
 @cli.command('stop-instance')
 @click.argument('instance_id')
 def stop_instance(instance_id):
     """Stop the AWS Instance"""
-    #ec2_manager = Ec2Manager('default')
     print(ec2_manager.stop_instance(instance_id, True))
+
+
+@cli.command('get-sap-status')
+@click.argument('instance_id')
+def get_sap_status(instance_id):
+    """Get the running status of an SAP system."""
+    print(sap_manager.get_sap_system_status(instance_id))
 
 
 if __name__ == '__main__':
