@@ -29,9 +29,9 @@ class SAPSystemManager:
             protocol = 'http'
             port = '5' + instance_details['SysNr'] + '13'
             sapctrl_url = protocol + '://' + instance_details['IpAddress'] + ':' + port + '/?wsdl'
-            sapctrl_client = Client(sapctrl_url)
 
             try:
+                sapctrl_client = Client(sapctrl_url)
                 sapctrl_status = sapctrl_client.service.GetSystemInstanceList()
             # TODO: Issue in the in-between state of when the instance is running and the SAP system is not running yet.
 
@@ -40,8 +40,45 @@ class SAPSystemManager:
 
             return sapctrl_status
         else:
-            return {'Status': 'Instance is not in a running state'}
+            # return {'Status': 'Instance is not in a running state'}
+            return instance_details['StateCode']
 
-
-    def stop_sap_system(self, instance_id):
+    def stop_system(self, instance_id):
         """Stop and SAP Instance"""
+        instance_details = self.ec2.get_instance_details(instance_id)
+
+        if instance_details['StateCode'] is 16:
+            protocol = 'http'
+            port = '5' + instance_details['SysNr'] + '13'
+            sapctrl_url = protocol + '://' + instance_details['IpAddress'] + ':' + port + '/?wsdl'
+
+            try:
+                sapctrl_client = Client(sapctrl_url)
+                sapctrl_stop_system = sapctrl_client.service.StopSystem('SAPControl_ALL_INSTANCES')
+                return {'Status': 'Instance Stopped.'}
+
+            except:
+                return {'Status': 'Error in stopping system'}
+
+        else:
+            return {'Status': 'AWS Instance state is not in running state currently.'}
+
+    def start_system(self, instance_id):
+        """Stop and SAP Instance"""
+        instance_details = self.ec2.get_instance_details(instance_id)
+
+        if instance_details['StateCode'] is 16:
+            protocol = 'http'
+            port = '5' + instance_details['SysNr'] + '13'
+            sapctrl_url = protocol + '://' + instance_details['IpAddress'] + ':' + port + '/?wsdl'
+
+            #try:
+            sapctrl_client = Client(sapctrl_url)
+            sapctrl_start_system = sapctrl_client.service.StartSystem('SAPControl_ALL_INSTANCES')
+            return {'Status': 'Instance Started.'}
+
+            #except exceptions.ConnectionError as error:
+            #    return {'Status': 'Error in starting system' + error.errno()}
+
+        else:
+            return {'Status': 'AWS Instance state is not in running state currently.'}
