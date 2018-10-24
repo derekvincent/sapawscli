@@ -21,7 +21,7 @@ Command Line Interface to control SAP system running on AWS
     
 ## Features
 
-### AWS Features
+### Common Features
 #### List Instances - list_instances
 The `list instance` command return a list of all instances with the _SAP_SID_ value set. The following option are available:
 
@@ -47,9 +47,31 @@ The current returned list is in a JSON format and provides the following values:
 - Application Server (Bool)
 - Standalone Hana DB (Bool)
 
+### AWS commands 
 #### Instance Status - instance-status
-The `instance-status` comment currently provides a AWS json formatted instance state code moade up of a Number and Text field. 
-     
+The `instance-status` command currently provides a AWS json formatted instance state code made up of a Number and Text field. 
+
+#### Start Instance - start-instance
+The `start-instance` command takes the aws _instance id_ and issues a start to the instance. It waits for the instance to start before returning.
+
+### Stop Instance - stop-instnace 
+The `stop-instance` command takes the aws _instance id_ and issues a stop to the instance. It waits for the instance to stop before returning.
+
+### SAP commands
+#### Instance Status - instance-status
+The `instance-status` command currently provides a SAP json formatted SAP instance state containing a list of:
+- hostnames
+- instance numbers
+- http/s ports
+- features (what services are running)
+- run status     
+
+#### Start Instance - start-instance
+The `start-instance` command takes the aws _instance id_ and issues a start to the SAP instance. It waits for the instance to start before returning.
+
+### Stop Instance - stop-instnace 
+The `stop-instance` command takes the aws _instance id_ and issues a stop to the SAP instance. It waits for the instance to stop before returning.
+      
 ## TODO
 
 - [X] Get a list of currently avaliable AMI's
@@ -61,7 +83,7 @@ The `instance-status` comment currently provides a AWS json formatted instance s
 - [X] Start a specific AMI
 - [X] Stop a specific AMI
 - [ ] Get a list of available SAP's system based a predetermined TAG system
-- [ ] Check the running status of an SAP ABAP instance
+- [X] Check the running status of an SAP ABAP instance
 - [ ] Start a full SAP ABAP system
 - [ ] Shutdown a full SAP ABAP system
 - [ ] Start specific components of a ABAP system [DB, ENQU, ACSC, APP Servers]

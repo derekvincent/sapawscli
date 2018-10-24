@@ -60,47 +60,55 @@ def list_instances(all_instances, sap_sid, sap_env):
     except ClientError as error:
         click.echo(error, err=True)
 
+@cli.group('aws')
+def aws():
+    """AWS Based Commands"""
 
-@cli.command('aws-instance-status')
+@aws.command('instance-status')
 @click.argument('instance_id')
-def aws_instance_status(instance_id):
+def instance_status(instance_id):
     """Returns the status of the specified instance."""
     print(ec2_manager.get_instances_status(instance_id))
 
 
-@cli.command('aws-start-instance')
+@aws.command('start-instance')
 @click.argument('instance_id')
-def aws_start_instance(instance_id):
+def start_instance(instance_id):
     """Start the AWS Instance."""
     print(ec2_manager.start_instance(instance_id,True))
 
 
-@cli.command('aws-stop-instance')
+@aws.command('stop-instance')
 @click.argument('instance_id')
-def aws_stop_instance(instance_id):
+def stop_instance(instance_id):
     """Stop the AWS Instance"""
     print(ec2_manager.stop_instance(instance_id, True))
 
 
-@cli.command('sap-instance-status')
+@cli.group('sap')
+def sap():
+    """SAP based commands"""
+
+@sap.command('instance-status')
 @click.argument('instance_id')
-def sap_instance_status(instance_id):
+def instance_status(instance_id):
     """Get the running status of an SAP system."""
     print(sap_manager.get_sap_system_status(instance_id))
 
 
-@cli.command('sap-stop-instance')
+@sap.command('stop-instance')
 @click.argument('instance_id')
-def sap_stop_instance(instance_id):
+def stop_instance(instance_id):
     """Stop a running SAP system."""
     print(sap_manager.stop_system(instance_id))
 
 
-@cli.command('sap-start-instance')
+@sap.command('start-instance')
 @click.argument('instance_id')
-def sap_start_instance(instance_id):
+def start_instance(instance_id):
     """Stop a running SAP system."""
     print(sap_manager.start_system(instance_id))
+
 
 if __name__ == '__main__':
     cli()
