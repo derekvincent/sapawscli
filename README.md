@@ -88,3 +88,6 @@ The `stop-instance` command takes the aws _instance id_ and issues a stop to the
 - [ ] Shutdown a full SAP ABAP system
 - [ ] Start specific components of a ABAP system [DB, ENQU, ACSC, APP Servers]
 - [ ] Stop specific components of a ABAP system [DB, ENQU, ACSC, APP Servers]
+- [ ] AMI Creation - shutdown, create ami, startup (optional)
+- [ ] EBS Snapshot creation (full system with ignore) - shutdown, snapshot, startup (optional)
+- [ ] AWS Instance Resize (up/down) - shutdown, snapshots (optional), resize EC2, startup

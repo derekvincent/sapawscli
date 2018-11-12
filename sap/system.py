@@ -6,10 +6,14 @@ Handle the SAP function of the SAPAWSCLI program
 
 from requests import Session
 from requests.auth import HTTPBasicAuth
-from zeep import Client
 from requests import exceptions
 
+from zeep import Client
+from zeep import xsd
 from zeep.transports import Transport
+
+
+
 
 
 class SAPSystemManager:
@@ -17,7 +21,14 @@ class SAPSystemManager:
     def __init__(self, ec2_manager):
         self.ec2 = ec2_manager
 
+    @staticmethod
+    def __soap_session_credentials(username, password):
+        """Set the username and password in the HTTP Session object"""
 
+        session = Session()
+        session.auth = HTTPBasicAuth(username, password)
+
+        return session
 
     def get_sap_system_status(self, instance_id):
         """Gets the running status of the SAP system"""
@@ -43,7 +54,7 @@ class SAPSystemManager:
             # return {'Status': 'Instance is not in a running state'}
             return instance_details['StateCode']
 
-    def stop_system(self, instance_id):
+    def stop_system(self, instance_id, username, password):
         """Stop and SAP Instance"""
         instance_details = self.ec2.get_instance_details(instance_id)
 
@@ -51,19 +62,25 @@ class SAPSystemManager:
             protocol = 'http'
             port = '5' + instance_details['SysNr'] + '13'
             sapctrl_url = protocol + '://' + instance_details['IpAddress'] + ':' + port + '/?wsdl'
+            session = self.__soap_session_credentials(username, password)
 
             try:
-                sapctrl_client = Client(sapctrl_url)
-                sapctrl_stop_system = sapctrl_client.service.StopSystem('SAPControl_ALL_INSTANCES')
+                sapctrl_client = Client(sapctrl_url, transport=Transport(session=session))
+                sapctrl_stop_system = sapctrl_client.service.StopSystem(
+                    options='SAPControl-ALL-INSTANCES',
+                    prioritylevel=xsd.SkipValue,
+                    softtimeout=xsd.SkipValue,
+                    waittimeout=xsd.SkipValue
+                )
                 return {'Status': 'Instance Stopped.'}
 
-            except:
+            except Exception as error:
                 return {'Status': 'Error in stopping system'}
 
         else:
             return {'Status': 'AWS Instance state is not in running state currently.'}
 
-    def start_system(self, instance_id):
+    def start_system(self, instance_id, username, password):
         """Stop and SAP Instance"""
         instance_details = self.ec2.get_instance_details(instance_id)
 
@@ -71,14 +88,19 @@ class SAPSystemManager:
             protocol = 'http'
             port = '5' + instance_details['SysNr'] + '13'
             sapctrl_url = protocol + '://' + instance_details['IpAddress'] + ':' + port + '/?wsdl'
+            session = self.__soap_session_credentials(username, password)
 
-            #try:
-            sapctrl_client = Client(sapctrl_url)
-            sapctrl_start_system = sapctrl_client.service.StartSystem('SAPControl_ALL_INSTANCES')
-            return {'Status': 'Instance Started.'}
+            try:
+                sapctrl_client = Client(sapctrl_url, transport=Transport(session=session))
+                sapctrl_stop_system = sapctrl_client.service.StartSystem(
+                    options='SAPControl-ALL-INSTANCES',
+                    prioritylevel=xsd.SkipValue,
+                    waittimeout=xsd.SkipValue
+                )
+                return {'Status': 'Instance Started.'}
 
-            #except exceptions.ConnectionError as error:
-            #    return {'Status': 'Error in starting system' + error.errno()}
+            except Exception as error:
+               return {'Status': 'Error in starting system' + error}
 
         else:
             return {'Status': 'AWS Instance state is not in running state currently.'}

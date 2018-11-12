@@ -98,16 +98,20 @@ def instance_status(instance_id):
 
 @sap.command('stop-instance')
 @click.argument('instance_id')
-def stop_instance(instance_id):
+@click.option('-u','--username', help='SAPControl user id ie. <sid>adm')
+@click.option('-p', '--password', prompt=True, hide_input=True)
+def stop_instance(instance_id, username, password):
     """Stop a running SAP system."""
-    print(sap_manager.stop_system(instance_id))
+    print(sap_manager.stop_system(instance_id, username, password))
 
 
 @sap.command('start-instance')
 @click.argument('instance_id')
-def start_instance(instance_id):
+@click.option('-u','--username', help='SAPControl user id ie. <sid>adm')
+@click.option('-p', '--password', prompt=True, hide_input=True)
+def start_instance(instance_id, username, password):
     """Stop a running SAP system."""
-    print(sap_manager.start_system(instance_id))
+    print(sap_manager.start_system(instance_id, username, password))
 
 
 if __name__ == '__main__':
